@@ -1,0 +1,4 @@
+/opt/sysmonitor/src/daemon.py		--	gen_context(system_u:object_r:sysmonitor_exec_t,s0)
+/opt/sysmonitor/venv/bin/python.*	--	gen_context(system_u:object_r:sysmonitor_exec_t,s0)
+/var/log/sysmonitor(/.*)?		gen_context(system_u:object_r:sysmonitor_log_t,s0)
+/opt/sysmonitor/venv/lib/python3\.14/site-packages/.+\.so	--	gen_context(system_u:object_r:sysmonitor_exec_t,s0)

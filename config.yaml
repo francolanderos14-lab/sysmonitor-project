@@ -1,0 +1,9 @@
+umbrales:
+  cpu: 85
+  memoria: 85
+  disco: 85
+
+logging:
+  ruta: "logs/sysmonitor.log"
+
+intervalo_segundos: 5

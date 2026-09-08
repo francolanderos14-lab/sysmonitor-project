@@ -1,0 +1,14 @@
+.env
+venv/
+__pycache__/
+*.pyc
+logs/
+
+# Subproductos de compilación de SELinux (se regeneran con sysmonitor.sh)
+selinux/tmp/
+selinux/*.pp
+selinux/*.rpm
+selinux/*.src.rpm
+selinux/noarch/
+selinux/*.8
+selinux/sysmonitor_selinux.spec

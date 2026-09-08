@@ -1,0 +1,50 @@
+policy_module(sysmonitor, 1.0.0)
+
+require {
+	type cert_t;
+	type proc_t;
+	type fs_t;
+	type node_t;
+}
+
+########################################
+#
+# Declarations
+#
+
+type sysmonitor_t;
+type sysmonitor_exec_t;
+init_daemon_domain(sysmonitor_t, sysmonitor_exec_t)
+
+type sysmonitor_log_t;
+logging_log_file(sysmonitor_log_t)
+
+########################################
+#
+# sysmonitor local policy
+#
+allow sysmonitor_t self:fifo_file rw_fifo_file_perms;
+allow sysmonitor_t self:unix_stream_socket create_stream_socket_perms;
+
+manage_dirs_pattern(sysmonitor_t, sysmonitor_log_t, sysmonitor_log_t)
+manage_files_pattern(sysmonitor_t, sysmonitor_log_t, sysmonitor_log_t)
+manage_lnk_files_pattern(sysmonitor_t, sysmonitor_log_t, sysmonitor_log_t)
+logging_log_filetrans(sysmonitor_t, sysmonitor_log_t, { dir file lnk_file })
+
+domain_use_interactive_fds(sysmonitor_t)
+
+files_read_etc_files(sysmonitor_t)
+
+miscfiles_read_localization(sysmonitor_t)
+
+# Acceso a certificados TLS del sistema (necesario para verificar HTTPS al mandar el webhook)
+allow sysmonitor_t cert_t:dir { getattr open read search };
+allow sysmonitor_t cert_t:file { getattr open read };
+
+# Lectura de /proc (necesario para psutil: CPU, memoria, disco)
+allow sysmonitor_t proc_t:file { getattr open read };
+allow sysmonitor_t fs_t:filesystem getattr;
+
+# Sockets TCP salientes (necesario para el webhook HTTPS a Discord)
+allow sysmonitor_t self:tcp_socket { bind create };
+allow sysmonitor_t node_t:tcp_socket node_bind;
