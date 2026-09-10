@@ -1,0 +1,6 @@
+[Container]
+Image=quay.io/prometheus/node-exporter:latest
+Pod=sysmonitor.pod
+
+[Install]
+WantedBy=default.target

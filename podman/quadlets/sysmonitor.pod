@@ -1,0 +1,8 @@
+[Pod]
+PodName=sysmonitor-pod
+PublishPort=9090:9090
+PublishPort=3000:3000
+PublishPort=9100:9100
+
+[Install]
+WantedBy=default.target

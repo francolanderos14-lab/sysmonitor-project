@@ -12,3 +12,4 @@ selinux/*.src.rpm
 selinux/noarch/
 selinux/*.8
 selinux/sysmonitor_selinux.spec
+podman/grafana-data/

@@ -1,0 +1,7 @@
+[Container]
+Image=docker.io/prom/prometheus:latest
+Pod=sysmonitor.pod
+Volume=%h/proyectos/sysmonitor-project/podman/prometheus.yml:/etc/prometheus/prometheus.yml:Z
+
+[Install]
+WantedBy=default.target

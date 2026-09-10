@@ -1,0 +1,7 @@
+[Container]
+Image=docker.io/grafana/grafana:latest
+Pod=sysmonitor.pod
+Volume=%h/proyectos/sysmonitor-project/podman/grafana-data:/var/lib/grafana:Z
+
+[Install]
+WantedBy=default.target
