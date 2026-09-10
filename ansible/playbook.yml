@@ -1,0 +1,8 @@
+---
+- name: Desplegar SysMonitor
+  hosts: localhost
+  become: true
+  vars_files:
+    - roles/sysmonitor/vars/secrets.yml
+  roles:
+    - sysmonitor

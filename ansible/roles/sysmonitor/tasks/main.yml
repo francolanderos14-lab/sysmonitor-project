@@ -83,3 +83,17 @@
     owner: "{{ sysmonitor_user }}"
     group: "{{ sysmonitor_user }}"
     mode: '0644'
+- name: Generar .env con el webhook de Discord
+  ansible.builtin.copy:
+    content: "DISCORD_WEBHOOK_URL={{ discord_webhook_url }}\n"
+    dest: "{{ sysmonitor_install_dir }}/.env"
+    owner: "{{ sysmonitor_user }}"
+    group: "{{ sysmonitor_user }}"
+    mode: '0600'
+
+- name: Desplegar unidad systemd del servicio
+  ansible.builtin.template:
+    src: sysmonitor.service.j2
+    dest: /etc/systemd/system/sysmonitor.service
+    mode: '0644'
+  notify: Recargar systemd y reiniciar sysmonitor

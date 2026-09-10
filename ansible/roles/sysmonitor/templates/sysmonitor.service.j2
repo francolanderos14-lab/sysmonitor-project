@@ -1,0 +1,15 @@
+[Unit]
+Description=SysMonitor - Daemon de monitoreo de CPU, memoria y disco
+After=network.target
+
+[Service]
+Type=simple
+User={{ sysmonitor_user }}
+Group={{ sysmonitor_user }}
+WorkingDirectory={{ sysmonitor_install_dir }}
+ExecStart={{ sysmonitor_install_dir }}/venv/bin/python -u {{ sysmonitor_install_dir }}/src/daemon.py --loop
+Restart=always
+RestartSec=5
+
+ProtectSystem=full
+PrivateTmp=true

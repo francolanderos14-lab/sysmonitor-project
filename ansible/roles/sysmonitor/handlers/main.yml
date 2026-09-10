@@ -1,0 +1,7 @@
+---
+- name: Recargar systemd y reiniciar sysmonitor
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: sysmonitor.service
+    state: restarted
+    enabled: true
