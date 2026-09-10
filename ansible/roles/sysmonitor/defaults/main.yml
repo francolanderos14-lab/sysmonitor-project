@@ -1,0 +1,7 @@
+sysmonitor_user: sysmonitor
+sysmonitor_install_dir: /opt/sysmonitor
+sysmonitor_log_dir: /var/log/sysmonitor
+
+umbral_cpu: 85
+umbral_memoria: 85
+umbral_disco: 85

@@ -1,0 +1,85 @@
+---
+- name: Instalar dependencias del sistema
+  ansible.builtin.dnf:
+    name:
+      - python3
+      - python3-pip
+      - policycoreutils-devel
+      - setools-console
+    state: present
+
+- name: Crear usuario de sistema dedicado para sysmonitor
+  ansible.builtin.user:
+    name: "{{ sysmonitor_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    home: "{{ sysmonitor_install_dir }}"
+    create_home: false
+
+- name: Crear directorio de instalación
+  ansible.builtin.file:
+    path: "{{ sysmonitor_install_dir }}"
+    state: directory
+    owner: "{{ sysmonitor_user }}"
+    group: "{{ sysmonitor_user }}"
+    mode: '0755'
+
+- name: Crear directorio src/ en destino
+  ansible.builtin.file:
+    path: "{{ sysmonitor_install_dir }}/src"
+    state: directory
+    owner: "{{ sysmonitor_user }}"
+    group: "{{ sysmonitor_user }}"
+    mode: '0755'
+
+- name: Crear directorio de logs
+  ansible.builtin.file:
+    path: "{{ sysmonitor_log_dir }}"
+    state: directory
+    owner: "{{ sysmonitor_user }}"
+    group: "{{ sysmonitor_user }}"
+    mode: '0755'
+
+- name: Copiar daemon.py
+  ansible.builtin.copy:
+    src: ../../../src/daemon.py
+    dest: "{{ sysmonitor_install_dir }}/src/daemon.py"
+    owner: "{{ sysmonitor_user }}"
+    group: "{{ sysmonitor_user }}"
+    mode: '0755'
+
+- name: Copiar rotate_logs.py
+  ansible.builtin.copy:
+    src: ../../../src/rotate_logs.py
+    dest: "{{ sysmonitor_install_dir }}/src/rotate_logs.py"
+    owner: "{{ sysmonitor_user }}"
+    group: "{{ sysmonitor_user }}"
+    mode: '0755'
+
+- name: Copiar requirements.txt
+  ansible.builtin.copy:
+    src: ../../../requirements.txt
+    dest: "{{ sysmonitor_install_dir }}/requirements.txt"
+    owner: "{{ sysmonitor_user }}"
+    group: "{{ sysmonitor_user }}"
+    mode: '0644'
+
+- name: Crear entorno virtual con copias reales (no symlinks, por SELinux)
+  ansible.builtin.command:
+    cmd: python3 -m venv --copies "{{ sysmonitor_install_dir }}/venv"
+    creates: "{{ sysmonitor_install_dir }}/venv/bin/python"
+  become_user: "{{ sysmonitor_user }}"
+
+- name: Instalar dependencias de Python en el venv
+  ansible.builtin.pip:
+    requirements: "{{ sysmonitor_install_dir }}/requirements.txt"
+    virtualenv: "{{ sysmonitor_install_dir }}/venv"
+  become_user: "{{ sysmonitor_user }}"
+
+- name: Generar config.yaml desde plantilla
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: "{{ sysmonitor_install_dir }}/config.yaml"
+    owner: "{{ sysmonitor_user }}"
+    group: "{{ sysmonitor_user }}"
+    mode: '0644'
