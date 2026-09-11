@@ -5,3 +5,7 @@
     name: sysmonitor.service
     state: restarted
     enabled: true
+
+- name: Restaurar contextos SELinux
+  ansible.builtin.command:
+    cmd: restorecon -R -F {{ sysmonitor_install_dir }} {{ sysmonitor_log_dir }}

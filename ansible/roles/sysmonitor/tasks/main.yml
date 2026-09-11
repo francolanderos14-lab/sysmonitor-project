@@ -83,6 +83,7 @@
     owner: "{{ sysmonitor_user }}"
     group: "{{ sysmonitor_user }}"
     mode: '0644'
+    
 - name: Generar .env con el webhook de Discord
   ansible.builtin.copy:
     content: "DISCORD_WEBHOOK_URL={{ discord_webhook_url }}\n"
@@ -97,3 +98,60 @@
     dest: /etc/systemd/system/sysmonitor.service
     mode: '0644'
   notify: Recargar systemd y reiniciar sysmonitor
+
+- name: Crear directorio temporal para la política SELinux
+  ansible.builtin.file:
+    path: /tmp/sysmonitor-selinux
+    state: directory
+    mode: '0755'
+
+- name: Copiar archivos fuente de la política SELinux
+  ansible.builtin.copy:
+    src: "../../../selinux/{{ item }}"
+    dest: "/tmp/sysmonitor-selinux/{{ item }}"
+  loop:
+    - sysmonitor.te
+    - sysmonitor.if
+    - sysmonitor.fc
+  loop_control:
+    label: "{{ item }}"
+
+- name: Compilar el módulo de política SELinux
+  ansible.builtin.command:
+    cmd: make -f /usr/share/selinux/devel/Makefile sysmonitor.pp
+    chdir: /tmp/sysmonitor-selinux
+    creates: /tmp/sysmonitor-selinux/sysmonitor.pp
+
+- name: Instalar el módulo de política SELinux
+  ansible.builtin.command:
+    cmd: semodule -i /tmp/sysmonitor-selinux/sysmonitor.pp
+  register: selinux_module_result
+  changed_when: "'already loaded' not in selinux_module_result.stderr"
+
+- name: Aplicar contexto a daemon.py
+  community.general.sefcontext:
+    target: "{{ sysmonitor_install_dir }}/src/daemon.py"
+    setype: sysmonitor_exec_t
+    state: present
+  notify: Restaurar contextos SELinux
+
+- name: Aplicar contexto a los binarios del venv
+  community.general.sefcontext:
+    target: "{{ sysmonitor_install_dir }}/venv/bin/python.*"
+    setype: sysmonitor_exec_t
+    state: present
+  notify: Restaurar contextos SELinux
+
+- name: Aplicar contexto a librerías nativas del venv
+  community.general.sefcontext:
+    target: "{{ sysmonitor_install_dir }}/venv/lib/python3\\.14/site-packages/.+\\.so"
+    setype: sysmonitor_exec_t
+    state: present
+  notify: Restaurar contextos SELinux
+
+- name: Aplicar contexto al directorio de logs
+  community.general.sefcontext:
+    target: "{{ sysmonitor_log_dir }}(/.*)?"
+    setype: sysmonitor_log_t
+    state: present
+  notify: Restaurar contextos SELinux
